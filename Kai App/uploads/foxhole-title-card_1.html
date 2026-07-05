@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Addison Foxhole — Title Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ================================================================= -->
+<!-- CUSTOMIZE THE EPISODE HERE:                                        -->
+<!-- ================================================================= -->
+<script>
+  const TOPIC = "BRAKE PAD INSPECTION";
+  const SUBTOPIC = "Recognizing Wear Patterns Before Failure";
+  const MANUAL_NO = "TM-11";
+  const EPISODE = "04";
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --paper: #e8dcc0;
+    --paper-dark: #d4c294;
+    --ink: #2a1f15;
+    --ink-fade: #4a3a28;
+    --olive: #4a5d3a;
+    --rust: #8b3a2a;
+    --brass: #b8904a;
+  }
+  html, body {
+    width: 100vw; height: 100vh; overflow: hidden;
+    background: var(--paper); color: var(--ink);
+    font-family: 'Special Elite', 'Courier New', monospace;
+    user-select: none;
+  }
+  body {
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(255,240,200,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(180,140,80,0.15) 0%, transparent 60%),
+      var(--paper);
+    position: relative;
+  }
+
+  /* Paper grain */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.12; pointer-events: none; z-index: 100; mix-blend-mode: multiply;
+  }
+
+  /* Subtle grid paper lines */
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(42,31,21,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,31,21,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Thick border frame */
+  .border-outer {
+    position: fixed; inset: 2rem;
+    border: 3px solid var(--ink);
+    z-index: 2;
+  }
+  .border-inner {
+    position: fixed; inset: 2.6rem;
+    border: 1px solid var(--ink);
+    z-index: 2;
+  }
+
+  /* Manual header bar */
+  .manual-header {
+    position: fixed;
+    top: 3.2rem; left: 3.2rem; right: 3.2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ink);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink);
+    z-index: 5;
+  }
+  .manual-header .divider-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: var(--rust);
+    border-radius: 50%;
+    margin: 0 0.6rem;
+    vertical-align: middle;
+  }
+
+  /* Main content */
+  .stage {
+    position: absolute; inset: 0;
+    padding: 8rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 3;
+  }
+
+  .eyebrow {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    letter-spacing: 0.45em;
+    color: var(--rust);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  .topic {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: clamp(3.5rem, 8vw, 9rem);
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+    color: var(--ink);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    max-width: 16ch;
+  }
+
+  .subtopic {
+    font-family: 'Special Elite', monospace;
+    font-size: clamp(1.1rem, 1.8vw, 1.8rem);
+    color: var(--ink-fade);
+    max-width: 42ch;
+    line-height: 1.4;
+    margin-bottom: 2rem;
+  }
+
+  .rule {
+    width: 120px; height: 3px;
+    background: var(--ink);
+    margin: 1rem 0;
+    position: relative;
+  }
+  .rule::after {
+    content: ''; position: absolute;
+    right: -12px; top: -4px;
+    width: 11px; height: 11px;
+    background: var(--rust);
+    border-radius: 50%;
+  }
+
+  /* Footer bar with stamps */
+  .footer {
+    position: fixed;
+    bottom: 3.2rem; left: 3.2rem; right: 3.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--ink);
+    display: flex; justify-content: space-between; align-items: flex-end;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    color: var(--ink);
+    text-transform: uppercase;
+    z-index: 5;
+  }
+
+  .brand {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    font-size: 1rem;
+  }
+  .brand .amp {
+    color: var(--rust);
+    margin: 0 0.3em;
+    font-weight: 400;
+  }
+
+  /* Stamps */
+  .stamp {
+    position: fixed;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    color: var(--rust);
+    border: 3px solid var(--rust);
+    padding: 0.5rem 1.2rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    opacity: 0.85;
+    z-index: 6;
+  }
+  .stamp.approved {
+    top: 14%; right: 8%;
+    transform: rotate(8deg);
+  }
+  .stamp.serial {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    border: none;
+    padding: 0;
+    color: var(--olive);
+    opacity: 0.7;
+  }
+
+  /* Vertical */
+  @media (max-aspect-ratio: 1/1) {
+    .stage { padding: 10rem 4rem; }
+    .topic { font-size: clamp(3rem, 12vw, 7rem); max-width: 12ch; }
+    .stamp.approved { top: 10%; right: 10%; }
+  }
+
+</style>
+</head>
+<body>
+
+  <div class="border-outer"></div>
+  <div class="border-inner"></div>
+
+  <div class="manual-header">
+    <div>Addison Foxhole <span class="divider-dot"></span> Technical Manual</div>
+    <div id="manual-num">TM-11 <span class="divider-dot"></span> EP. 04</div>
+  </div>
+
+  <div class="stage">
+    <div class="eyebrow">Field Instruction</div>
+    <h1 class="topic" id="topic">—</h1>
+    <div class="rule"></div>
+    <p class="subtopic" id="subtopic">—</p>
+  </div>
+
+  <div class="stamp approved">Field Tested</div>
+
+  <div class="footer">
+    <div class="brand">Addison <span class="amp">/</span> Foxhole</div>
+    <div>Auto Care <span style="color: var(--rust);">·</span> Coached Right</div>
+    <div id="date">—</div>
+  </div>
+
+<script>
+  document.getElementById('topic').textContent = TOPIC;
+  document.getElementById('subtopic').textContent = SUBTOPIC;
+  document.getElementById('manual-num').innerHTML =
+    `${MANUAL_NO} <span class="divider-dot"></span> EP. ${EPISODE}`;
+
+  const n = new Date();
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('date').textContent =
+    `${String(n.getDate()).padStart(2,'0')} ${months[n.getMonth()]} ${n.getFullYear()}`;
+</script>
+
+</body>
+</html>

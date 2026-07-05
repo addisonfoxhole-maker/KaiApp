@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Addison Foxhole — B-roll Frame</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Oswald:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CUSTOMIZE: -->
+<script>
+  const FIGURE_NO = "FIG. 04-A";
+  const CAPTION = "PAD MATERIAL WEAR INDICATOR";
+  const MANUAL_NO = "TM-11";
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --paper: #e8dcc0;
+    --ink: #2a1f15;
+    --ink-fade: #4a3a28;
+    --olive: #4a5d3a;
+    --rust: #8b3a2a;
+  }
+  html, body {
+    width: 100vw; height: 100vh;
+    background: transparent;
+    font-family: 'Special Elite', monospace;
+    color: var(--ink);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Corner registration marks — subtle "you're in the manual" cue */
+  .reg {
+    position: fixed;
+    width: 34px; height: 34px;
+    border: 2px solid var(--paper);
+    opacity: 0.9;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+  }
+  .reg.tl { top: 2rem; left: 2rem; border-right: none; border-bottom: none; }
+  .reg.tr { top: 2rem; right: 2rem; border-left: none; border-bottom: none; }
+  .reg.bl { bottom: 2rem; left: 2rem; border-right: none; border-top: none; }
+  .reg.br { bottom: 2rem; right: 2rem; border-left: none; border-top: none; }
+
+  /* Figure caption — top left */
+  .figure-tag {
+    position: fixed;
+    top: 2.5rem;
+    left: 2.5rem;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    padding: 0.7rem 1.2rem;
+    max-width: 520px;
+  }
+  .figure-tag::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.12; pointer-events: none; mix-blend-mode: multiply;
+  }
+  .figure-tag .fig-no {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.35em;
+    color: var(--rust);
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+  .figure-tag .caption {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  /* Webcam slot — top right corner PIP */
+  .cam-pip {
+    position: fixed;
+    top: 2.5rem;
+    right: 2.5rem;
+    width: 380px;
+    aspect-ratio: 16 / 9;
+    border: 3px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--ink);
+    background:
+      repeating-linear-gradient(45deg,
+        rgba(42,31,21,0.08) 0, rgba(42,31,21,0.08) 8px,
+        transparent 8px, transparent 16px),
+      var(--paper);
+    position: fixed;
+  }
+  .cam-pip::before {
+    content: 'INSTRUCTOR';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-fade);
+    text-transform: uppercase;
+  }
+  .cam-pip .pip-label {
+    position: absolute;
+    bottom: -2rem;
+    right: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--paper);
+    text-transform: uppercase;
+    background: var(--ink);
+    padding: 0.2rem 0.6rem;
+  }
+
+  /* Bottom bar — manual reference */
+  .bottom-bar {
+    position: fixed;
+    bottom: 2.5rem;
+    left: 2.5rem;
+    right: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.6rem 1.2rem;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+  .bottom-bar .dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: var(--rust);
+    border-radius: 50%;
+    margin: 0 0.6rem;
+    vertical-align: middle;
+  }
+  .brand .amp { color: var(--rust); margin: 0 0.2em; font-weight: 400; }
+
+  /* Vertical layout — PIP moves to top, wider */
+  @media (max-aspect-ratio: 1/1) {
+    .cam-pip {
+      width: calc(100% - 5rem);
+      right: 2.5rem; left: 2.5rem;
+      top: 8rem;
+    }
+    .figure-tag {
+      top: auto;
+      bottom: 8rem;
+      left: 2.5rem; right: 2.5rem;
+      max-width: none;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+  <div class="reg tl"></div>
+  <div class="reg tr"></div>
+  <div class="reg bl"></div>
+  <div class="reg br"></div>
+
+  <div class="figure-tag">
+    <div class="fig-no" id="fig">FIG. 04-A</div>
+    <div class="caption" id="caption">—</div>
+  </div>
+
+  <div class="cam-pip">
+    <div class="pip-label">CAM 01</div>
+  </div>
+
+  <div class="bottom-bar">
+    <div><span id="manual">TM-11</span> <span class="dot"></span> Demonstration</div>
+    <div class="brand">Addison <span class="amp">/</span> Foxhole</div>
+    <div>Section <span id="section">2.1</span></div>
+  </div>
+
+<script>
+  document.getElementById('fig').textContent = FIGURE_NO;
+  document.getElementById('caption').textContent = CAPTION;
+  document.getElementById('manual').textContent = MANUAL_NO;
+</script>
+
+</body>
+</html>

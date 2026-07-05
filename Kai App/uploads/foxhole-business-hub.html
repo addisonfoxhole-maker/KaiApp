@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Foxhole Academy — Business Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:        #09071a;
+    --dark:         #0e0b20;
+    --panel:        #160f2e;
+    --surface:      #1c1640;
+    --surface-2:    #221a4d;
+    --border:       #2e2458;
+    --border-light: #3d3270;
+
+    --muted:        #6b5f94;
+    --mid:          #9d8ec0;
+    --light:        #cac0e0;
+    --cream:        #f0ecf8;
+
+    --purple:       #5b21b6;
+    --purple-bright:#6d28d9;
+    --purple-soft:  #a78bfa;
+    --purple-dim:   #2e1065;
+
+    --teal:         #14b8a6;
+    --teal-bright:  #2dd4bf;
+    --teal-dim:     #0d4a44;
+
+    --sand:         #e8d5b0;
+    --amber:        #f0b849;
+    --red:          #e0566f;
+    --red-soft:     #f08aa0;
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body:    'Plus Jakarta Sans', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+
+    --radius: 12px;
+    --radius-sm: 7px;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 50% 50% at 12% 0%, rgba(91,33,182,.10) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 90% 10%, rgba(20,184,166,.06) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 22px 80px; }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 34px 0 26px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+  .brand { display: flex; flex-direction: column; gap: 3px; }
+  .brand-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--teal-bright);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brand-eyebrow::before {
+    content: ''; width: 22px; height: 1px; background: var(--teal); display: block;
+  }
+  .brand-title {
+    font-family: var(--font-display);
+    font-size: 31px;
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--cream);
+    letter-spacing: -.01em;
+  }
+  .brand-title span { color: var(--purple-soft); font-style: italic; font-weight: 400; }
+
+  .month-nav { display: flex; align-items: center; gap: 6px; }
+  .month-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--mid);
+    width: 34px; height: 34px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .16s;
+  }
+  .month-btn:hover { border-color: var(--purple-soft); color: var(--cream); }
+  .month-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: .04em;
+    color: var(--cream);
+    min-width: 124px;
+    text-align: center;
+    padding: 7px 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .month-label.is-current { border-color: var(--teal-dim); color: var(--teal-bright); }
+
+  /* ── THE GAUGE: signature element ── */
+  .runway {
+    background: linear-gradient(165deg, #1a1142 0%, #130d2c 100%);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 34px 38px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .runway::after {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(20,184,166,.10) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .runway-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 16px; margin-bottom: 24px; position: relative;
+  }
+  .runway-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 10px;
+  }
+  .runway-net {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 7vw, 66px);
+    font-weight: 700;
+    line-height: .95;
+    letter-spacing: -.02em;
+  }
+  .runway-net.pos { color: var(--teal-bright); }
+  .runway-net.neg { color: var(--red-soft); }
+  .runway-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    letter-spacing: .02em;
+  }
+  .runway-verdict {
+    text-align: right;
+    max-width: 280px;
+  }
+  .verdict-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 12px;
+  }
+  .verdict-pill.hit { background: rgba(20,184,166,.12); border: 1px solid rgba(20,184,166,.35); color: var(--teal-bright); }
+  .verdict-pill.close { background: rgba(240,184,73,.10); border: 1px solid rgba(240,184,73,.3); color: var(--amber); }
+  .verdict-pill.under { background: rgba(224,86,111,.10); border: 1px solid rgba(224,86,111,.3); color: var(--red-soft); }
+  .verdict-text { font-size: 13px; color: var(--light); line-height: 1.5; }
+  .verdict-text strong { color: var(--cream); font-weight: 600; }
+
+  /* progress bar toward $3k */
+  .gauge-track-wrap { position: relative; }
+  .gauge-scale {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 7px;
+    letter-spacing: .04em;
+  }
+  .gauge-track {
+    height: 16px;
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+  .gauge-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width .6s cubic-bezier(.4,0,.2,1), background .4s;
+    position: relative;
+    min-width: 2px;
+  }
+  .gauge-fill.pos { background: linear-gradient(90deg, var(--purple) 0%, var(--teal) 100%); }
+  .gauge-fill.neg { background: linear-gradient(90deg, var(--red) 0%, #b8344a 100%); }
+  /* the $3k goal marker */
+  .gauge-goal {
+    position: absolute;
+    top: -5px; bottom: -5px;
+    width: 2px;
+    background: var(--amber);
+    z-index: 2;
+  }
+  .gauge-goal::after {
+    content: '$3K GOAL';
+    position: absolute;
+    top: -19px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+
+  /* ── STAT STRIP ── */
+  .stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    transition: border-color .18s;
+  }
+  .stat:hover { border-color: var(--border-light); }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .stat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .stat-dot.rev { background: var(--teal); }
+  .stat-dot.exp { background: var(--red); }
+  .stat-dot.mrr { background: var(--purple-soft); }
+  .stat-dot.goal { background: var(--amber); }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--cream);
+    letter-spacing: -.01em;
+  }
+  .stat-meta { font-size: 12px; color: var(--mid); margin-top: 7px; }
+  .stat-meta .up { color: var(--teal-bright); }
+  .stat-meta .down { color: var(--red-soft); }
+
+  /* ── LAYOUT COLUMNS ── */
+  .cols {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--cream);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .card-title .count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .card-sum {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .card-sum.rev { color: var(--teal-bright); }
+  .card-sum.exp { color: var(--red-soft); }
+  .card-body { padding: 8px 12px 16px; }
+
+  /* ── LINE ITEMS ── */
+  .line {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: var(--radius-sm);
+    transition: background .14s;
+  }
+  .line:hover { background: var(--surface); }
+  .line:hover .line-del { opacity: 1; }
+  .line-main { min-width: 0; }
+  .line-name {
+    font-size: 14px;
+    color: var(--cream);
+    font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .line-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .05em;
+    color: var(--muted);
+    margin-top: 2px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .line-badge {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 1px 7px;
+    border-radius: 100px;
+    border: 1px solid var(--border-light);
+    color: var(--mid);
+  }
+  .line-badge.fixed { color: var(--purple-soft); border-color: rgba(167,139,250,.3); }
+  .line-badge.recur { color: var(--teal-bright); border-color: rgba(45,212,191,.3); }
+  .line-amt {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .line-amt.rev { color: var(--teal-bright); }
+  .line-amt.exp { color: var(--red-soft); }
+  .line-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 15px;
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    opacity: 0;
+    transition: all .14s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .line-del:hover { color: var(--red-soft); background: rgba(224,86,111,.1); }
+
+  .empty {
+    text-align: center;
+    padding: 28px 20px;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .empty .empty-mark { font-size: 26px; opacity: .35; margin-bottom: 8px; }
+
+  /* ── ADD ROW ── */
+  .add-row {
+    padding: 14px 12px 4px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .add-grid {
+    display: grid;
+    grid-template-columns: 1fr 96px auto;
+    gap: 8px;
+  }
+  .add-grid.exp-grid { grid-template-columns: 1fr 96px 92px auto; }
+  input, select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--cream);
+    outline: none;
+    transition: border-color .16s;
+  }
+  input::placeholder { color: var(--muted); }
+  input:focus, select:focus { border-color: var(--purple-soft); }
+  select { cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: .03em; }
+  .add-btn {
+    background: var(--purple);
+    border: none;
+    color: #fff;
+    border-radius: var(--radius-sm);
+    width: 38px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 400;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .16s;
+    line-height: 1;
+  }
+  .add-btn:hover { background: var(--purple-bright); }
+  .add-btn.teal { background: var(--teal); color: var(--black); }
+  .add-btn.teal:hover { background: var(--teal-bright); }
+  .add-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 9px;
+    font-family: var(--font-mono);
+    letter-spacing: .02em;
+    padding: 0 2px;
+  }
+
+  /* ── RIGHT RAIL widgets ── */
+  .rail { display: flex; flex-direction: column; gap: 16px; }
+
+  /* MRR breakdown */
+  .tier-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+  }
+  .tier-row:hover { background: var(--surface); }
+  .tier-name { font-size: 13.5px; color: var(--light); font-weight: 500; }
+  .tier-price { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .tier-stepper { display: flex; align-items: center; gap: 8px; }
+  .step-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--mid);
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .14s;
+    line-height: 1;
+  }
+  .step-btn:hover { border-color: var(--purple-soft); color: var(--cream); }
+  .step-count {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--cream);
+    min-width: 22px;
+    text-align: center;
+  }
+  .tier-sub {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal-bright);
+    min-width: 56px;
+    text-align: right;
+  }
+  .mrr-foot {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .mrr-foot-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); }
+  .mrr-foot-val { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--purple-soft); }
+
+  /* health checklist */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 11px 12px;
+    font-size: 13.5px;
+    color: var(--light);
+    line-height: 1.45;
+  }
+  .check-mark {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+  .check-mark.done { background: rgba(20,184,166,.15); color: var(--teal-bright); border: 1px solid rgba(20,184,166,.3); }
+  .check-mark.pending { background: rgba(255,255,255,.03); color: var(--muted); border: 1px solid var(--border); }
+  .check-item strong { color: var(--cream); font-weight: 600; }
+
+  /* break-even callout */
+  .breakeven {
+    padding: 18px 24px;
+    background: linear-gradient(135deg, rgba(91,33,182,.12) 0%, rgba(20,184,166,.06) 100%);
+    border-top: 1px solid var(--border);
+  }
+  .breakeven-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--mid); margin-bottom: 8px; }
+  .breakeven-text { font-size: 13.5px; color: var(--light); line-height: 1.55; }
+  .breakeven-text strong { color: var(--teal-bright); font-weight: 600; }
+  .breakeven-text .accent { color: var(--purple-soft); font-weight: 600; }
+
+  /* section label */
+  .rail-foot-note {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.55;
+    padding: 4px 2px;
+    font-style: italic;
+  }
+
+  /* ── notes / data mgmt footer ── */
+  .data-bar {
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .data-status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .03em;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .save-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--teal); flex-shrink: 0;
+    box-shadow: 0 0 8px rgba(20,184,166,.5);
+  }
+  .data-actions { display: flex; gap: 9px; }
+  .ghost-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--mid);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .16s;
+  }
+  .ghost-btn:hover { border-color: var(--purple-soft); color: var(--cream); }
+  .ghost-btn.danger:hover { border-color: var(--red); color: var(--red-soft); }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 26px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface-2);
+    border: 1px solid var(--border-light);
+    color: var(--cream);
+    padding: 12px 22px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    letter-spacing: .03em;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .3s;
+    z-index: 200;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .loading-veil {
+    position: fixed; inset: 0;
+    background: var(--black);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 300;
+    flex-direction: column; gap: 16px;
+    transition: opacity .4s;
+  }
+  .loading-veil.gone { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 34px; height: 34px;
+    border: 3px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-veil span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .cols { grid-template-columns: 1fr; }
+    .stat-strip { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px 60px; }
+    .runway { padding: 26px 22px; }
+    .runway-verdict { text-align: left; }
+    .stat-strip { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .add-grid { grid-template-columns: 1fr 80px auto; }
+    .add-grid.exp-grid { grid-template-columns: 1fr 1fr; }
+    .add-grid.exp-grid .add-btn { grid-column: 1 / -1; width: 100%; height: 38px; }
+    header { padding: 24px 0 20px; }
+  }
+
+  /* focus visibility */
+  button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--purple-soft);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-veil" id="veil">
+  <div class="spinner"></div>
+  <span>Loading your numbers…</span>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-eyebrow">Business Hub</div>
+      <div class="brand-title">The Foxhole <span>Ledger</span></div>
+    </div>
+    <div class="month-nav">
+      <button class="month-btn" id="prevMonth" aria-label="Previous month">‹</button>
+      <div class="month-label" id="monthLabel">—</div>
+      <button class="month-btn" id="nextMonth" aria-label="Next month">›</button>
+    </div>
+  </header>
+
+  <!-- ── RUNWAY GAUGE ── -->
+  <section class="runway">
+    <div class="runway-top">
+      <div>
+        <div class="runway-label">Net this month</div>
+        <div class="runway-net" id="netValue">$0</div>
+        <div class="runway-sub" id="netSub">Revenue minus expenses</div>
+      </div>
+      <div class="runway-verdict">
+        <div class="verdict-pill under" id="verdictPill">— Building —</div>
+        <div class="verdict-text" id="verdictText">Add your numbers to see where you stand against the $3,000 quit-the-job goal.</div>
+      </div>
+    </div>
+    <div class="gauge-track-wrap">
+      <div class="gauge-scale">
+        <span>$0</span>
+        <span>Goal: $3,000/mo sustained</span>
+        <span id="gaugeMax">$4,000</span>
+      </div>
+      <div class="gauge-track">
+        <div class="gauge-goal" id="gaugeGoal" style="left:75%"></div>
+        <div class="gauge-fill pos" id="gaugeFill" style="width:0%"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STAT STRIP ── -->
+  <div class="stat-strip">
+    <div class="stat">
+      <div class="stat-label"><span class="stat-dot rev"></span>Revenue</div>
+      <div class="stat-value" id="statRevenue">$0</div>
+      <div class="stat-meta" id="statRevenueMeta">No income logged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span class="stat-dot exp"></span>Expenses</div>
+      <div class="stat-value" id="statExpenses">$0</div>
+      <div class="stat-meta" id="statExpensesMeta">No costs logged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span class="stat-dot mrr"></span>Recurring MRR</div>
+      <div class="stat-value" id="statMRR">$0</div>
+      <div class="stat-meta" id="statMRRMeta">From memberships</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label"><span class="stat-dot goal"></span>To Goal</div>
+      <div class="stat-value" id="statGoal">$3,000</div>
+      <div class="stat-meta" id="statGoalMeta">net still needed</div>
+    </div>
+  </div>
+
+  <!-- ── MAIN COLUMNS ── -->
+  <div class="cols">
+
+    <!-- LEFT: Revenue + Expenses ledger -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+
+      <!-- REVENUE -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Revenue <span class="count" id="revCount">0 items</span></div>
+          <div class="card-sum rev" id="revSum">$0</div>
+        </div>
+        <div class="card-body" id="revList"></div>
+        <div class="add-row">
+          <div class="add-grid">
+            <input type="text" id="revName" placeholder="e.g. 1:1 session — Maria" />
+            <input type="number" id="revAmt" placeholder="$" min="0" step="0.01" />
+            <button class="add-btn teal" id="revAdd" aria-label="Add revenue">+</button>
+          </div>
+          <div class="add-hint">One-off income: sessions, workshops, merch. Memberships go in the MRR panel →</div>
+        </div>
+      </div>
+
+      <!-- EXPENSES -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Operating Expenses <span class="count" id="expCount">0 items</span></div>
+          <div class="card-sum exp" id="expSum">$0</div>
+        </div>
+        <div class="card-body" id="expList"></div>
+        <div class="add-row">
+          <div class="add-grid exp-grid">
+            <input type="text" id="expName" placeholder="e.g. Zapier, Cal.com, embroidery" />
+            <input type="number" id="expAmt" placeholder="$" min="0" step="0.01" />
+            <select id="expType">
+              <option value="recur">Recurring</option>
+              <option value="fixed">One-time</option>
+            </select>
+            <button class="add-btn" id="expAdd" aria-label="Add expense">+</button>
+          </div>
+          <div class="add-hint">Recurring = monthly subscriptions (carry forward each month). One-time = a single charge.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT RAIL -->
+    <div class="rail">
+
+      <!-- MEMBERSHIP MRR -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Membership MRR</div>
+        </div>
+        <div class="card-body" id="tierList"></div>
+        <div class="mrr-foot">
+          <div class="mrr-foot-label">Monthly recurring</div>
+          <div class="mrr-foot-val" id="mrrTotal">$0</div>
+        </div>
+      </div>
+
+      <!-- BREAK-EVEN INTELLIGENCE -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Where You Stand</div>
+        </div>
+        <div class="breakeven">
+          <div class="breakeven-label">Break-even</div>
+          <div class="breakeven-text" id="breakevenText">Log your expenses to see how many members cover your costs.</div>
+        </div>
+        <div class="breakeven" style="border-top:1px solid var(--border); background:transparent;">
+          <div class="breakeven-label">The $3k Quit Line</div>
+          <div class="breakeven-text" id="quitLineText">Sustain $3,000 net for 3 months and the part-time job is optional.</div>
+        </div>
+      </div>
+
+      <!-- HEALTH CHECKLIST -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Monthly Health</div>
+        </div>
+        <div class="card-body" id="healthList"></div>
+      </div>
+
+      <p class="rail-foot-note">
+        Everything saves automatically to this browser. Use Export to keep a JSON backup
+        or hand numbers to your CPA.
+      </p>
+
+    </div>
+  </div>
+
+  <!-- DATA BAR -->
+  <div class="data-bar">
+    <div class="data-status">
+      <span class="save-dot"></span>
+      <span id="saveStatus">All changes saved</span>
+    </div>
+    <div class="data-actions">
+      <button class="ghost-btn" id="exportBtn">Export backup</button>
+      <button class="ghost-btn" id="importBtn">Import</button>
+      <button class="ghost-btn" id="copyCpaBtn">Copy for CPA</button>
+      <button class="ghost-btn danger" id="clearBtn">Clear month</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept="application/json" style="display:none" />
+
+<script>
+(function() {
+  'use strict';
+
+  // ─────────────────────────────────────────────
+  // CONFIG — your real numbers, from prior sessions
+  // ─────────────────────────────────────────────
+  const GOAL = 3000;            // monthly net to quit the part-time job
+  const GAUGE_PADDING = 1.33;   // gauge max = goal * this (so goal sits at ~75%)
+
+  // Membership tiers — locked structure from your planning
+  const TIERS = [
+    { id: 'garage',  name: 'Garage Access',  price: 27 },
+    { id: 'hood',    name: 'Under the Hood',  price: 67 },
+    { id: 'full',    name: 'Full Service',    price: 147 }
+  ];
+
+  // ─────────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────────
+  let currentMonth = monthKey(new Date());
+  let store = {};       // { 'YYYY-MM': { revenue:[], expenses:[], members:{} } }
+  let saveTimer = null;
+
+  function monthKey(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  }
+  function monthDisplay(key) {
+    const [y,m] = key.split('-').map(Number);
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[m-1] + ' ' + y;
+  }
+  function blankMonth() {
+    const members = {};
+    TIERS.forEach(t => members[t.id] = 0);
+    return { revenue: [], expenses: [], members };
+  }
+  function getMonth(key) {
+    if (!store[key]) store[key] = blankMonth();
+    // ensure member keys exist
+    if (!store[key].members) store[key].members = {};
+    TIERS.forEach(t => { if (store[key].members[t.id] == null) store[key].members[t.id] = 0; });
+    return store[key];
+  }
+  function money(n) {
+    const neg = n < 0;
+    const v = Math.abs(n);
+    const s = '$' + v.toLocaleString('en-US', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
+    return neg ? '−' + s : s;
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  // ─────────────────────────────────────────────
+  // PERSISTENCE
+  // ─────────────────────────────────────────────
+  async function loadAll() {
+    try {
+      const res = await window.storage.list('foxledger:');
+      if (res && res.keys) {
+        for (const k of res.keys) {
+          try {
+            const rec = await window.storage.get(k);
+            if (rec && rec.value) {
+              const mk = k.replace('foxledger:', '');
+              store[mk] = JSON.parse(rec.value);
+            }
+          } catch(e) { /* skip bad key */ }
+        }
+      }
+    } catch(e) {
+      // storage unavailable — run in-memory
+      console.log('Storage unavailable, running in-memory', e);
+    }
+  }
+
+  async function saveMonth(key) {
+    flashSaving();
+    try {
+      await window.storage.set('foxledger:' + key, JSON.stringify(store[key]));
+      flashSaved();
+    } catch(e) {
+      setStatus('Saved in memory (storage off)');
+    }
+  }
+
+  function flashSaving() {
+    setStatus('Saving…');
+  }
+  function flashSaved() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => setStatus('All changes saved'), 300);
+  }
+  function setStatus(t) {
+    document.getElementById('saveStatus').textContent = t;
+  }
+
+  // ─────────────────────────────────────────────
+  // CALCULATIONS
+  // ─────────────────────────────────────────────
+  function calc(key) {
+    const m = getMonth(key);
+    const oneOffRev = m.revenue.reduce((s,r) => s + (+r.amount||0), 0);
+    const mrr = TIERS.reduce((s,t) => s + (m.members[t.id]||0) * t.price, 0);
+    const revenue = oneOffRev + mrr;
+    const expenses = m.expenses.reduce((s,e) => s + (+e.amount||0), 0);
+    const net = revenue - expenses;
+    return { oneOffRev, mrr, revenue, expenses, net, m };
+  }
+
+  // ─────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────
+  function render() {
+    const key = currentMonth;
+    const c = calc(key);
+    const isCurrent = key === monthKey(new Date());
+
+    // month label
+    const ml = document.getElementById('monthLabel');
+    ml.textContent = monthDisplay(key);
+    ml.classList.toggle('is-current', isCurrent);
+
+    // ── runway gauge ──
+    const net = c.net;
+    const netEl = document.getElementById('netValue');
+    netEl.textContent = money(net);
+    netEl.className = 'runway-net ' + (net >= 0 ? 'pos' : 'neg');
+    document.getElementById('netSub').textContent =
+      money(c.revenue) + ' revenue  −  ' + money(c.expenses) + ' expenses';
+
+    const gaugeMax = GOAL * GAUGE_PADDING;
+    document.getElementById('gaugeMax').textContent = money(gaugeMax);
+    const fill = document.getElementById('gaugeFill');
+    const pct = Math.max(0, Math.min(100, (net / gaugeMax) * 100));
+    fill.style.width = pct + '%';
+    fill.className = 'gauge-fill ' + (net >= 0 ? 'pos' : 'neg');
+    document.getElementById('gaugeGoal').style.left = ((GOAL/gaugeMax)*100) + '%';
+
+    // verdict
+    const pill = document.getElementById('verdictPill');
+    const vtext = document.getElementById('verdictText');
+    if (net >= GOAL) {
+      pill.className = 'verdict-pill hit';
+      pill.textContent = '✓ Goal hit';
+      const over = net - GOAL;
+      vtext.innerHTML = 'You cleared the line by <strong>' + money(over) + '</strong>. Hold this 3 months running and the part-time job is optional.';
+    } else if (net >= GOAL * 0.66) {
+      pill.className = 'verdict-pill close';
+      pill.textContent = '◐ Almost there';
+      vtext.innerHTML = '<strong>' + money(GOAL - net) + '</strong> short of the quit line. That\'s about <strong>' + membersNeeded(GOAL - net) + '</strong> more members.';
+    } else if (net >= 0) {
+      pill.className = 'verdict-pill under';
+      pill.textContent = '↑ Building';
+      vtext.innerHTML = 'Profitable, but <strong>' + money(GOAL - net) + '</strong> under the quit line. Keep stacking members and sessions.';
+    } else {
+      pill.className = 'verdict-pill under';
+      pill.textContent = '⚠ Underwater';
+      vtext.innerHTML = 'Expenses outrun income by <strong>' + money(-net) + '</strong> this month. Cover costs first, then climb.';
+    }
+
+    // ── stat strip ──
+    document.getElementById('statRevenue').textContent = money(c.revenue);
+    document.getElementById('statRevenueMeta').innerHTML =
+      c.revenue > 0 ? '<span class="up">' + money(c.mrr) + '</span> recurring + ' + money(c.oneOffRev) + ' one-off' : 'No income logged';
+
+    document.getElementById('statExpenses').textContent = money(c.expenses);
+    const recurExp = c.m.expenses.filter(e=>e.type==='recur').reduce((s,e)=>s+(+e.amount||0),0);
+    document.getElementById('statExpensesMeta').innerHTML =
+      c.expenses > 0 ? money(recurExp) + ' recurring' : 'No costs logged';
+
+    document.getElementById('statMRR').textContent = money(c.mrr);
+    const totalMembers = TIERS.reduce((s,t)=>s+(c.m.members[t.id]||0),0);
+    document.getElementById('statMRRMeta').textContent = totalMembers + ' active member' + (totalMembers===1?'':'s');
+
+    const toGoal = Math.max(0, GOAL - net);
+    document.getElementById('statGoal').textContent = toGoal === 0 ? '✓ Met' : money(toGoal);
+    document.getElementById('statGoalMeta').textContent = toGoal === 0 ? 'goal reached' : 'net still needed';
+
+    // ── revenue list ──
+    renderRevenue(c.m);
+    document.getElementById('revCount').textContent = c.m.revenue.length + ' item' + (c.m.revenue.length===1?'':'s');
+    document.getElementById('revSum').textContent = money(c.oneOffRev);
+
+    // ── expense list ──
+    renderExpenses(c.m);
+    document.getElementById('expCount').textContent = c.m.expenses.length + ' item' + (c.m.expenses.length===1?'':'s');
+    document.getElementById('expSum').textContent = money(c.expenses);
+
+    // ── tier list ──
+    renderTiers(c.m);
+    document.getElementById('mrrTotal').textContent = money(c.mrr);
+
+    // ── break-even ──
+    renderBreakeven(c);
+
+    // ── health ──
+    renderHealth(c);
+  }
+
+  function membersNeeded(amount) {
+    // assume mid-tier ($67) as the planning unit
+    const mid = 67;
+    return Math.ceil(amount / mid) + ' @ $67';
+  }
+
+  function renderRevenue(m) {
+    const el = document.getElementById('revList');
+    if (!m.revenue.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-mark">○</div>No one-off income yet.<br>Log sessions, workshops, or merch sales here.</div>';
+      return;
+    }
+    el.innerHTML = m.revenue.map(r => `
+      <div class="line">
+        <div class="line-main">
+          <div class="line-name">${esc(r.name)}</div>
+        </div>
+        <div class="line-amt rev">${money(+r.amount||0)}</div>
+        <button class="line-del" data-del-rev="${r.id}" aria-label="Remove">✕</button>
+      </div>`).join('');
+  }
+
+  function renderExpenses(m) {
+    const el = document.getElementById('expList');
+    if (!m.expenses.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-mark">○</div>No expenses logged.<br>Add your tool subscriptions and operating costs.</div>';
+      return;
+    }
+    // sort: recurring first, then by amount desc
+    const sorted = [...m.expenses].sort((a,b) => {
+      if (a.type !== b.type) return a.type === 'recur' ? -1 : 1;
+      return (+b.amount||0) - (+a.amount||0);
+    });
+    el.innerHTML = sorted.map(e => `
+      <div class="line">
+        <div class="line-main">
+          <div class="line-name">${esc(e.name)}</div>
+          <div class="line-tag">
+            <span class="line-badge ${e.type==='recur'?'recur':'fixed'}">${e.type==='recur'?'Recurring':'One-time'}</span>
+          </div>
+        </div>
+        <div class="line-amt exp">${money(+e.amount||0)}</div>
+        <button class="line-del" data-del-exp="${e.id}" aria-label="Remove">✕</button>
+      </div>`).join('');
+  }
+
+  function renderTiers(m) {
+    const el = document.getElementById('tierList');
+    el.innerHTML = TIERS.map(t => {
+      const count = m.members[t.id] || 0;
+      const sub = count * t.price;
+      return `
+        <div class="tier-row">
+          <div>
+            <div class="tier-name">${t.name}</div>
+            <div class="tier-price">$${t.price}/mo each</div>
+          </div>
+          <div class="tier-stepper">
+            <button class="step-btn" data-tier-dec="${t.id}" aria-label="Remove member">−</button>
+            <span class="step-count">${count}</span>
+            <button class="step-btn" data-tier-inc="${t.id}" aria-label="Add member">+</button>
+          </div>
+          <div class="tier-sub">${sub>0?money(sub):'—'}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderBreakeven(c) {
+    const beEl = document.getElementById('breakevenText');
+    if (c.expenses <= 0) {
+      beEl.innerHTML = 'Log your expenses to see how many members cover your costs.';
+    } else {
+      // weighted by mid tier
+      const mid = 67;
+      const needed = Math.ceil(c.expenses / mid);
+      const coveredBy = c.mrr >= c.expenses;
+      if (coveredBy) {
+        beEl.innerHTML = 'Memberships already cover costs. Every session and new member past here is <strong>profit</strong>.';
+      } else {
+        beEl.innerHTML = 'Costs run <strong>' + money(c.expenses) + '/mo</strong>. About <span class="accent">' + needed + ' members @ $67</span> covers everything.';
+      }
+    }
+
+    const qEl = document.getElementById('quitLineText');
+    const gap = GOAL - c.net;
+    if (gap <= 0) {
+      qEl.innerHTML = 'You\'re <strong>over the line</strong> this month. Log 3 in a row and you\'re free to walk.';
+    } else {
+      qEl.innerHTML = 'Need <strong>' + money(gap) + '</strong> more net. Sustain $3k for 3 months → part-time job optional.';
+    }
+  }
+
+  function renderHealth(c) {
+    const el = document.getElementById('healthList');
+    const totalMembers = TIERS.reduce((s,t)=>s+(c.m.members[t.id]||0),0);
+    const checks = [
+      { done: c.expenses > 0, t: c.expenses > 0 ? '<strong>Expenses tracked</strong> for this month' : 'Log your operating expenses' },
+      { done: c.revenue > 0, t: c.revenue > 0 ? '<strong>Income recorded</strong>' : 'No income logged yet' },
+      { done: c.mrr >= c.expenses && c.expenses > 0, t: (c.mrr >= c.expenses && c.expenses > 0) ? '<strong>Costs covered</strong> by recurring revenue' : 'Recurring revenue doesn\'t cover costs yet' },
+      { done: c.net >= 0, t: c.net >= 0 ? '<strong>Profitable</strong> this month' : 'Operating at a loss this month' },
+      { done: c.net >= GOAL, t: c.net >= GOAL ? '<strong>$3k goal met</strong> — track the streak' : '$3k quit-line not yet hit' }
+    ];
+    el.innerHTML = checks.map(ch => `
+      <div class="check-item">
+        <span class="check-mark ${ch.done?'done':'pending'}">${ch.done?'✓':'○'}</span>
+        <span>${ch.t}</span>
+      </div>`).join('');
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // ─────────────────────────────────────────────
+  // ACTIONS
+  // ─────────────────────────────────────────────
+  function addRevenue() {
+    const name = document.getElementById('revName').value.trim();
+    const amt = parseFloat(document.getElementById('revAmt').value);
+    if (!name || isNaN(amt) || amt <= 0) { toast('Add a name and amount'); return; }
+    const m = getMonth(currentMonth);
+    m.revenue.push({ id: uid(), name, amount: amt });
+    document.getElementById('revName').value = '';
+    document.getElementById('revAmt').value = '';
+    document.getElementById('revName').focus();
+    saveMonth(currentMonth);
+    render();
+  }
+
+  function addExpense() {
+    const name = document.getElementById('expName').value.trim();
+    const amt = parseFloat(document.getElementById('expAmt').value);
+    const type = document.getElementById('expType').value;
+    if (!name || isNaN(amt) || amt <= 0) { toast('Add a name and amount'); return; }
+    const m = getMonth(currentMonth);
+    m.expenses.push({ id: uid(), name, amount: amt, type });
+    document.getElementById('expName').value = '';
+    document.getElementById('expAmt').value = '';
+    document.getElementById('expName').focus();
+    saveMonth(currentMonth);
+    render();
+  }
+
+  function changeTier(id, delta) {
+    const m = getMonth(currentMonth);
+    m.members[id] = Math.max(0, (m.members[id]||0) + delta);
+    saveMonth(currentMonth);
+    render();
+  }
+
+  function carryForwardRecurring() {
+    // when navigating to a fresh future month, offer to carry recurring expenses + members
+    const m = getMonth(currentMonth);
+    if (m.expenses.length > 0 || m.revenue.length > 0) return; // already has data
+    // find most recent prior month with data
+    const keys = Object.keys(store).filter(k => k < currentMonth && (store[k].expenses.length || Object.values(store[k].members||{}).some(v=>v>0))).sort();
+    if (!keys.length) return;
+    const prev = store[keys[keys.length-1]];
+    const recurring = prev.expenses.filter(e => e.type === 'recur');
+    const hasMembers = Object.values(prev.members||{}).some(v=>v>0);
+    if (!recurring.length && !hasMembers) return;
+
+    if (confirm('Carry forward recurring costs' + (hasMembers?' and member counts':'') + ' from ' + monthDisplay(keys[keys.length-1]) + '?')) {
+      recurring.forEach(e => m.expenses.push({ id: uid(), name: e.name, amount: e.amount, type: 'recur' }));
+      if (hasMembers) {
+        TIERS.forEach(t => m.members[t.id] = prev.members[t.id] || 0);
+      }
+      saveMonth(currentMonth);
+      render();
+      toast('Carried forward ' + recurring.length + ' recurring item' + (recurring.length===1?'':'s'));
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // MONTH NAV
+  // ─────────────────────────────────────────────
+  function shiftMonth(delta) {
+    const [y,m] = currentMonth.split('-').map(Number);
+    const d = new Date(y, m-1+delta, 1);
+    currentMonth = monthKey(d);
+    render();
+    carryForwardRecurring();
+  }
+
+  // ─────────────────────────────────────────────
+  // DATA MANAGEMENT
+  // ─────────────────────────────────────────────
+  function exportData() {
+    const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'foxhole-ledger-' + monthKey(new Date()) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Backup downloaded');
+  }
+
+  function importData(file) {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (typeof data !== 'object') throw new Error('bad');
+        store = data;
+        for (const k of Object.keys(store)) await saveMonth(k);
+        render();
+        toast('Data imported');
+      } catch(e) {
+        toast('Could not read that file');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function copyForCPA() {
+    const c = calc(currentMonth);
+    const m = c.m;
+    let lines = [];
+    lines.push('THE FOXHOLE ACADEMY — ' + monthDisplay(currentMonth));
+    lines.push('='.repeat(40));
+    lines.push('');
+    lines.push('REVENUE');
+    TIERS.forEach(t => {
+      const cnt = m.members[t.id]||0;
+      if (cnt>0) lines.push('  ' + t.name + ' x' + cnt + ' @ $' + t.price + ' = $' + (cnt*t.price));
+    });
+    m.revenue.forEach(r => lines.push('  ' + r.name + ' = $' + (+r.amount||0)));
+    lines.push('  TOTAL REVENUE: ' + money(c.revenue).replace('−','-'));
+    lines.push('');
+    lines.push('EXPENSES');
+    m.expenses.forEach(e => lines.push('  ' + e.name + ' (' + (e.type==='recur'?'recurring':'one-time') + ') = $' + (+e.amount||0)));
+    lines.push('  TOTAL EXPENSES: ' + money(c.expenses).replace('−','-'));
+    lines.push('');
+    lines.push('NET: ' + money(c.net).replace('−','-'));
+
+    const text = lines.join('\n');
+    navigator.clipboard.writeText(text).then(
+      () => toast('Copied — paste anywhere'),
+      () => toast('Copy failed')
+    );
+  }
+
+  async function clearMonth() {
+    if (!confirm('Clear all data for ' + monthDisplay(currentMonth) + '? This can\'t be undone.')) return;
+    store[currentMonth] = blankMonth();
+    await saveMonth(currentMonth);
+    render();
+    toast('Month cleared');
+  }
+
+  // ─────────────────────────────────────────────
+  // TOAST
+  // ─────────────────────────────────────────────
+  let toastTimer = null;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ─────────────────────────────────────────────
+  // EVENTS
+  // ─────────────────────────────────────────────
+  document.getElementById('revAdd').addEventListener('click', addRevenue);
+  document.getElementById('expAdd').addEventListener('click', addExpense);
+  document.getElementById('prevMonth').addEventListener('click', () => shiftMonth(-1));
+  document.getElementById('nextMonth').addEventListener('click', () => shiftMonth(1));
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('copyCpaBtn').addEventListener('click', copyForCPA);
+  document.getElementById('clearBtn').addEventListener('click', clearMonth);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', e => {
+    if (e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  // enter-to-add
+  ['revName','revAmt'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key==='Enter') addRevenue(); });
+  });
+  ['expName','expAmt'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key==='Enter') addExpense(); });
+  });
+
+  // delegated delete + tier steppers
+  document.addEventListener('click', e => {
+    const dr = e.target.closest('[data-del-rev]');
+    const de = e.target.closest('[data-del-exp]');
+    const ti = e.target.closest('[data-tier-inc]');
+    const td = e.target.closest('[data-tier-dec]');
+    if (dr) {
+      const m = getMonth(currentMonth);
+      m.revenue = m.revenue.filter(r => r.id !== dr.getAttribute('data-del-rev'));
+      saveMonth(currentMonth); render();
+    } else if (de) {
+      const m = getMonth(currentMonth);
+      m.expenses = m.expenses.filter(x => x.id !== de.getAttribute('data-del-exp'));
+      saveMonth(currentMonth); render();
+    } else if (ti) {
+      changeTier(ti.getAttribute('data-tier-inc'), 1);
+    } else if (td) {
+      changeTier(td.getAttribute('data-tier-dec'), -1);
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  // BOOT
+  // ─────────────────────────────────────────────
+  async function boot() {
+    await loadAll();
+    render();
+    setTimeout(() => {
+      document.getElementById('veil').classList.add('gone');
+    }, 350);
+  }
+  boot();
+
+})();
+</script>
+</body>
+</html>
