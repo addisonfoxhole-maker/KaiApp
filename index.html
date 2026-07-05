@@ -290,6 +290,26 @@ body[data-theme="reef"] .daychips button.on{ color:#032020; }
 }
 button:focus-visible, input:focus-visible, select:focus-visible{ outline:3px solid var(--k-teal); outline-offset:2px; }
 
+/* ---------- gentle week strip ---------- */
+.week{ display:flex; align-items:center; gap:5px; margin-top:16px; }
+.week .wk-arrow{
+  min-width:38px; min-height:52px; border:0; border-radius:14px; cursor:pointer;
+  background:rgba(255,255,255,.16); color:#fff; font-size:17px; font-family:inherit;
+}
+.week .days{ flex:1; display:flex; gap:5px; }
+.wk-day{
+  flex:1; min-height:52px; border:0; border-radius:14px; cursor:pointer; font-family:inherit;
+  background:rgba(255,255,255,.14); color:rgba(255,255,255,.92);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  position:relative;
+}
+.wk-day .dl{ font-size:10.5px; font-weight:800; letter-spacing:.08em; opacity:.85; }
+.wk-day .dn{ font-size:15px; font-weight:800; }
+.wk-day.today{ box-shadow:inset 0 0 0 2px rgba(255,255,255,.75); }
+.wk-day.sel{ background:#fff; color:var(--k-segink); }
+.wk-day .pip{ width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.65; position:absolute; bottom:6px; }
+.backtoday{ margin:2px 0 12px; }
+
 </style>
 </head>
 <body>
@@ -303,7 +323,9 @@ button:focus-visible, input:focus-visible, select:focus-visible{ outline:3px sol
 const KEY = 'kai_v1';
 const $ = (s, r) => (r||document).querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-3);
-const todayKey = () => { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const keyFromDate = (d) => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dateFromKey = (k) => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const todayKey = () => keyFromDate(new Date());
 const nowMin = () => { const d = new Date(); return d.getHours()*60 + d.getMinutes(); };
 const fmt = (min) => {
   let h = Math.floor(min/60), m = min%60;
@@ -318,21 +340,23 @@ const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','
 /* ---------- state ---------- */
 function defaults(){
   return {
-    v: 1,
+    v: 2,
     name: 'Kainoa',
-    theme: 'auto',                       // auto | lagoon | reef
-    workdays: [1,2,3,4],                 // Mon–Thu
-    shiftStart: 660, shiftEnd: 900,      // 11:00–15:00
-    routine: [
-      { id: uid(), text: 'Brush teeth' },
-      { id: uid(), text: 'Deodorant' },
-      { id: uid(), text: 'Vitamins + big glass of water' },
-      { id: uid(), text: 'Wash face + sunscreen' },
-      { id: uid(), text: 'Move your body — 15 min' },
+    theme: 'auto',
+    workdays: [1,2,3,4],
+    shiftStart: 660, shiftEnd: 900,
+    routines: [
+      { id: uid(), name: 'Morning routine', emoji: '🌺', steps: [
+        { id: uid(), text: 'Brush teeth' },
+        { id: uid(), text: 'Deodorant' },
+        { id: uid(), text: 'Vitamins + big glass of water' },
+        { id: uid(), text: 'Wash face + sunscreen' },
+        { id: uid(), text: 'Move your body — 15 min' },
+      ]},
     ],
-    routineDone: {},                     // dateKey -> [routine ids]
-    days: {},                            // dateKey -> { mode:'auto'|'work'|'off', blocks:[...] }
-    inbox: [],                           // [{id,text}]
+    routineDone: {},          // dateKey -> { routineId: [stepIds] }
+    days: {},                 // dateKey -> { mode, blocks }
+    inbox: [],
     islands: [
       { id: uid(), name: 'Auto Upkeep', color: '#FF8A66', items: [] },
       { id: uid(), name: 'OrcaTeknic',  color: '#5B8DEF', items: [] },
@@ -343,19 +367,36 @@ function defaults(){
 let S;
 try { S = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')); }
 catch(e){ S = defaults(); }
+
+/* migrate v1 (single routine) -> v2 (multiple routines) without losing data */
+if (S.routine){
+  const rid = uid();
+  S.routines = [{ id: rid, name: 'Morning routine', emoji: '🌺', steps: S.routine }];
+  const rd = {};
+  for (const [dk, arr] of Object.entries(S.routineDone || {})){
+    rd[dk] = Array.isArray(arr) ? { [rid]: arr } : arr;
+  }
+  S.routineDone = rd;
+  delete S.routine;
+  S.v = 2;
+}
+if (!Array.isArray(S.routines)) S.routines = defaults().routines;
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+save();
 
 /* ---------- day model ---------- */
-function isWorkday(){
-  const d = ensureDay();
-  if (d.mode === 'work') return true;
-  if (d.mode === 'off') return false;
-  return S.workdays.includes(new Date().getDay());
+let selKey = todayKey();   // date shown on the Today view (not persisted — reopening lands on today)
+
+function isWorkDate(k){
+  const d = S.days[k];
+  if (d && d.mode === 'work') return true;
+  if (d && d.mode === 'off') return false;
+  return S.workdays.includes(dateFromKey(k).getDay());
 }
 function seedBlocks(work){
   const blocks = [];
   if (work){
-    blocks.push({ id: uid(), title: 'Outline Module 3 — Brake Systems', tag: 'Morning swell · deep work', islandName: 'Auto Upkeep', startMin: Math.max(510, 0), durMin: 45, locked: false, done: false });
+    blocks.push({ id: uid(), title: 'Outline Module 3 — Brake Systems', tag: 'Morning swell · deep work', islandName: 'Auto Upkeep', startMin: 510, durMin: 45, locked: false, done: false });
     blocks.push({ id: uid(), title: 'Shift at the shop', tag: 'Part-time', islandName: '', startMin: S.shiftStart, durMin: S.shiftEnd - S.shiftStart, locked: true, done: false });
     blocks.push({ id: uid(), title: 'Edit OrcaTeknic stream intro', tag: 'Afternoon', islandName: 'OrcaTeknic', startMin: S.shiftEnd + 60, durMin: 60, locked: false, done: false });
   } else {
@@ -365,32 +406,32 @@ function seedBlocks(work){
   }
   return blocks;
 }
-function ensureDay(){
-  const k = todayKey();
+function ensureDay(k){
+  k = k || todayKey();
   if (!S.days[k]){
-    const work = S.workdays.includes(new Date().getDay());
-    S.days[k] = { mode: 'auto', blocks: seedBlocks(work) };
+    // only today gets the starter seed; other days start as an open shore
+    const blocks = (k === todayKey()) ? seedBlocks(S.workdays.includes(dateFromKey(k).getDay())) : [];
+    S.days[k] = { mode: 'auto', blocks };
     save();
   }
   return S.days[k];
 }
-function blocksToday(){ return ensureDay().blocks.slice().sort((a,b)=>a.startMin-b.startMin); }
+function blocksOf(k){ return ensureDay(k).blocks.slice().sort((a,b)=>a.startMin-b.startMin); }
 function behindMinutes(){
   const n = nowMin();
   let behind = 0;
-  for (const b of blocksToday()){
+  for (const b of blocksOf(todayKey())){
     if (!b.locked && !b.done && b.startMin + b.durMin <= n) behind += b.durMin;
   }
   return behind;
 }
 function reflow(){
-  const day = ensureDay();
+  const day = ensureDay(todayKey());
   const n = nowMin();
   const locked = day.blocks.filter(b => b.locked && !b.done && b.startMin + b.durMin > n).sort((a,b)=>a.startMin-b.startMin);
   const flex = day.blocks.filter(b => !b.locked && !b.done).sort((a,b)=>a.startMin-b.startMin);
-  let cursor = Math.max(n, 0);
+  let cursor = n;
   for (const b of flex){
-    // slide cursor past any locked block it collides with
     let placed = false;
     while (!placed){
       placed = true;
@@ -408,19 +449,18 @@ function reflow(){
 }
 function currentBlock(){
   const n = nowMin();
-  const bs = blocksToday().filter(b => !b.done);
+  const bs = blocksOf(todayKey()).filter(b => !b.done);
   return bs.find(b => b.startMin <= n && n < b.startMin + b.durMin) || bs.find(b => b.startMin >= n) || bs[0] || null;
 }
 
 /* ---------- theme ---------- */
 function applyTheme(){
-  const pref = S.theme;
-  const dark = pref === 'reef' || (pref === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const dark = S.theme === 'reef' || (S.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.body.dataset.theme = dark ? 'reef' : 'lagoon';
   const meta = $('meta[name=theme-color]');
   if (meta) meta.content = dark ? '#02141d' : '#0E6E76';
 }
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.theme==='auto'){ applyTheme(); } });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.theme==='auto') applyTheme(); });
 
 /* ---------- sheets ---------- */
 let sheetCleanup = null;
@@ -448,9 +488,10 @@ function closeSheet(instant){
 let view = 'now';
 const app = $('#app');
 
-function header(cls, inner){
-  const dateStr = new Date().toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
-  const work = isWorkday();
+function header(cls, inner, dateK){
+  const k = dateK || todayKey();
+  const dateStr = dateFromKey(k).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+  const work = isWorkDate(k);
   const chip = work ? '☀ work by ' + fmt(S.shiftStart) : '🌴 day off';
   return `<header class="hdr ${cls}">
     <div class="hdr-top">
@@ -464,18 +505,27 @@ function header(cls, inner){
   </header>`;
 }
 
-function viewNow(){
-  const work = isWorkday();
-  const day = ensureDay();
-  const doneIds = S.routineDone[todayKey()] || [];
-  const cur = currentBlock();
-  const alts = blocksToday().filter(b => !b.done && (!cur || b.id !== cur.id) && !b.locked).slice(0,3);
-  const parked = S.islands.reduce((n,i)=>n+i.items.filter(x=>!x.done).length, 0) + S.inbox.length;
+function routineCards(){
+  const rd = S.routineDone[todayKey()] || {};
+  return S.routines.map(r => {
+    const done = rd[r.id] || [];
+    const steps = r.steps.map(st => `
+      <div class="routine-item ${done.includes(st.id)?'done':''}" data-act="routine" data-rid="${r.id}" data-id="${st.id}" role="checkbox" aria-checked="${done.includes(st.id)}" tabindex="0">
+        <span class="box">${done.includes(st.id)?'✓':''}</span><span class="txt">${esc(st.text)}</span>
+      </div>`).join('');
+    return `<div class="card">
+      <div class="card-h"><h2>${r.emoji ? esc(r.emoji)+' ' : ''}${esc(r.name)}</h2><span class="meta">${done.length} of ${r.steps.length}</span></div>
+      ${steps || '<div class="empty">No steps yet — add some in Settings.</div>'}
+    </div>`;
+  }).join('');
+}
 
-  const routineHtml = S.routine.map(r => `
-    <div class="routine-item ${doneIds.includes(r.id)?'done':''}" data-act="routine" data-id="${r.id}" role="checkbox" aria-checked="${doneIds.includes(r.id)}" tabindex="0">
-      <span class="box">${doneIds.includes(r.id)?'✓':''}</span><span class="txt">${esc(r.text)}</span>
-    </div>`).join('');
+function viewNow(){
+  const work = isWorkDate(todayKey());
+  const day = ensureDay(todayKey());
+  const cur = currentBlock();
+  const alts = blocksOf(todayKey()).filter(b => !b.done && (!cur || b.id !== cur.id) && !b.locked).slice(0,3);
+  const parked = S.islands.reduce((n,i)=>n+i.items.filter(x=>!x.done).length, 0) + S.inbox.length;
 
   const rn = cur ? `
     <div class="card">
@@ -512,10 +562,7 @@ function viewNow(){
     <span class="chip autotag" style="${day.mode==='auto'?'':'opacity:.45'}">auto</span>
   `) + `
   <div class="content">
-    <div class="card">
-      <div class="card-h"><h2>🌺 Morning routine</h2><span class="meta">${doneIds.length} of ${S.routine.length}</span></div>
-      ${routineHtml || '<div class="empty">No routine yet — add steps in Settings.</div>'}
-    </div>
+    ${routineCards()}
     ${rn}
     ${altHtml}
     <div class="card">
@@ -529,14 +576,42 @@ function viewNow(){
   </div>`;
 }
 
-function viewToday(){
-  const bs = blocksToday();
-  const n = nowMin();
-  const behind = behindMinutes();
-  const work = isWorkday();
-  const flexAhead = bs.filter(b=>!b.locked && !b.done && b.startMin >= n).length;
+function weekStrip(){
+  const sel = dateFromKey(selKey);
+  const start = new Date(sel); start.setDate(sel.getDate() - sel.getDay()); // Sunday of selected week
+  const tk = todayKey();
+  const letters = ['S','M','T','W','T','F','S'];
+  let chips = '';
+  for (let i = 0; i < 7; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const k = keyFromDate(d);
+    const has = S.days[k] && S.days[k].blocks.some(b => !b.done);
+    chips += `<button class="wk-day ${k===selKey?'sel':''} ${k===tk?'today':''}" data-act="pick-day" data-k="${k}" aria-label="${d.toDateString()}">
+      <span class="dl">${letters[i]}</span><span class="dn">${d.getDate()}</span>${has?'<span class="pip"></span>':''}
+    </button>`;
+  }
+  return `<div class="week">
+    <button class="wk-arrow" data-act="week-move" data-dir="-1" aria-label="Previous week">‹</button>
+    <div class="days">${chips}</div>
+    <button class="wk-arrow" data-act="week-move" data-dir="1" aria-label="Next week">›</button>
+  </div>`;
+}
 
-  let rows = '', nowDrawn = false;
+function viewToday(){
+  const isToday = selKey === todayKey();
+  const bs = blocksOf(selKey);
+  const n = nowMin();
+  const behind = isToday ? behindMinutes() : 0;
+  const work = isWorkDate(selKey);
+  const flexAhead = bs.filter(b => !b.locked && !b.done && (!isToday || b.startMin >= n)).length;
+  const wd = dateFromKey(selKey).toLocaleDateString(undefined, { weekday:'long' });
+  const title = isToday ? 'Today\u2019s Shore' : wd + '\u2019s Shore';
+  const sub = isToday
+    ? (work ? 'Shift ' + fmt(S.shiftStart) + '\u2013' + fmt(S.shiftEnd) + ' · ' + flexAhead + ' focus block' + (flexAhead===1?'':'s') + ' around it'
+            : 'Wide open · ' + flexAhead + ' gentle block' + (flexAhead===1?'':'s'))
+    : (bs.length ? bs.length + ' block' + (bs.length===1?'':'s') + ' planned · tap any to tweak' : 'An open shore — plan it gently');
+
+  let rows = '', nowDrawn = !isToday;
   for (const b of bs){
     if (!nowDrawn && b.startMin > n){
       rows += `<div class="nowline"><span class="dot"></span><span class="dash"></span><span class="lbl">now · ${fmt(n)}</span></div>`;
@@ -555,10 +630,12 @@ function viewToday(){
   if (!nowDrawn) rows += `<div class="nowline"><span class="dot"></span><span class="dash"></span><span class="lbl">now · ${fmt(n)}</span></div>`;
 
   return header('today', `
-    <h1 class="greet">Today\u2019s Shore</h1>
-    <div class="hdr-sub">${work ? 'Shift ' + fmt(S.shiftStart) + '\u2013' + fmt(S.shiftEnd) + ' · ' + flexAhead + ' focus block' + (flexAhead===1?'':'s') + ' around it' : 'Wide open · ' + flexAhead + ' gentle block' + (flexAhead===1?'':'s')}</div>
-  `) + `
+    <h1 class="greet">${title}</h1>
+    <div class="hdr-sub">${sub}</div>
+    ${weekStrip()}
+  `, selKey) + `
   <div class="content">
+    ${!isToday ? '<button class="btn ghost block backtoday" data-act="back-today">↩ Back to today</button>' : ''}
     ${behind > 0 ? `
     <div class="behind">
       <h3>You\u2019re ${behind}m behind</h3>
@@ -612,14 +689,17 @@ function render(){
 }
 
 /* ---------- sheets: block edit ---------- */
-function blockSheet(id){
-  const day = ensureDay();
+function blockSheet(id, dateK){
+  const k = dateK || selKey;
+  const day = ensureDay(k);
   const b = id ? day.blocks.find(x=>x.id===id) : null;
   const isNew = !b;
-  const v = b || { title:'', tag:'', islandName:'', startMin: Math.ceil(nowMin()/15)*15, durMin: 25, locked:false, done:false };
+  const startDefault = (k === todayKey()) ? Math.ceil(nowMin()/15)*15 : 540;
+  const v = b || { title:'', tag:'', islandName:'', startMin: startDefault, durMin: 25, locked:false, done:false };
   const islandOpts = ['<option value="">— none —</option>'].concat(S.islands.map(i=>`<option ${v.islandName===i.name?'selected':''}>${esc(i.name)}</option>`)).join('');
+  const dayLabel = dateFromKey(k).toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
   openSheet(`
-    <div class="sheet-h"><h2>${isNew?'New block':'Edit block'}</h2>
+    <div class="sheet-h"><h2>${isNew?'New block':'Edit block'} <span class="quiet" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600">· ${esc(dayLabel)}</span></h2>
       ${!isNew?'<button class="btn danger" style="min-height:40px" data-s="del">Delete</button>':''}</div>
     <div class="field"><label>Title</label><input type="text" data-s="title" value="${esc(v.title)}" maxlength="80"></div>
     <div class="row2">
@@ -663,7 +743,7 @@ function islandSheet(id){
         <button class="xbtn" data-i="del-item" data-id="${it.id}" aria-label="Remove">✕</button>
       </div>`).join('') || '<div class="empty">Nothing parked here yet.</div>';
   };
-  const sheet = openSheet(`
+  openSheet(`
     <div class="sheet-h"><h2><span class="isl-dot" style="background:${isl.color};display:inline-flex;width:30px;height:30px;font-size:14px;border-radius:10px;vertical-align:-8px;margin-right:8px">${esc(isl.name.slice(0,1))}</span>${esc(isl.name)}</h2>
       <button class="linkish" data-i="edit-island">Edit</button></div>
     <div id="isl-items"></div>
@@ -684,10 +764,10 @@ function islandSheet(id){
       }
       if (act === 'promote'){
         const it = isl.items.find(x=>x.id===iid);
-        const day = ensureDay();
+        const day = ensureDay(todayKey());
         day.blocks.push({ id: uid(), title: it.text, tag: 'From ' + isl.name, islandName: isl.name, startMin: Math.ceil(nowMin()/15)*15, durMin: 25, locked:false, done:false });
         isl.items = isl.items.filter(x=>x.id!==iid);
-        save(); closeSheet(); view='today'; render();
+        save(); closeSheet(); selKey = todayKey(); view='today'; render();
       }
       if (act === 'edit-island'){ closeSheet(true); islandEditSheet(isl.id); }
     });
@@ -747,9 +827,22 @@ function assignSheet(inboxId){
 function settingsSheet(){
   const dayNames = ['S','M','T','W','T','F','S'];
   const draw = (sheet) => {
-    $('#set-routine', sheet).innerHTML = S.routine.map(r => `
-      <div class="list-edit-row"><span class="t">${esc(r.text)}</span>
-        <button class="xbtn" data-t="del-routine" data-id="${r.id}" aria-label="Remove step">✕</button></div>`).join('') || '<div class="empty">No steps yet.</div>';
+    $('#set-routines', sheet).innerHTML = S.routines.map(r => `
+      <div class="card" style="padding:14px;margin-bottom:12px">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+          <input type="text" data-t="rname" data-rid="${r.id}" value="${esc(r.name)}" maxlength="40"
+            style="flex:1;min-height:44px;border:1.5px solid var(--k-inputln);border-radius:13px;background:var(--k-cardsoft);color:var(--k-ink);font:inherit;font-size:15px;font-weight:700;padding:0 12px">
+          <button class="xbtn" data-t="del-rtn" data-rid="${r.id}" aria-label="Delete routine">✕</button>
+        </div>
+        ${r.steps.map(st => `
+          <div class="list-edit-row"><span class="t">${esc(st.text)}</span>
+            <button class="xbtn" data-t="del-step" data-rid="${r.id}" data-id="${st.id}" aria-label="Remove step">✕</button></div>`).join('')
+          || '<div class="empty" style="padding:12px">No steps yet.</div>'}
+        <div class="capture" style="margin-top:10px">
+          <input type="text" data-t="step-in" data-rid="${r.id}" placeholder="Add a step" maxlength="80">
+          <button class="btn primary" data-t="add-step" data-rid="${r.id}">Add</button>
+        </div>
+      </div>`).join('');
     sheet.querySelectorAll('.daychips button').forEach((b,i)=>b.classList.toggle('on', S.workdays.includes(i)));
   };
   openSheet(`
@@ -765,12 +858,10 @@ function settingsSheet(){
       <div class="field"><label>Shift ends</label><input type="time" data-t="shift-end" value="${toHM(S.shiftEnd)}"></div>
     </div>
 
-    <div class="settings-sec">Morning routine</div>
-    <div id="set-routine"></div>
-    <div class="capture" style="margin-top:12px">
-      <input type="text" id="set-routine-in" placeholder="Add a step" maxlength="80">
-      <button class="btn primary" data-t="add-routine">Add</button>
-    </div>
+    <div class="settings-sec">Routines</div>
+    <div class="about" style="margin-bottom:12px">Each routine shows as its own checklist on the Now screen and resets every morning.</div>
+    <div id="set-routines"></div>
+    <button class="btn ghost block" data-t="add-rtn">+ New routine</button>
 
     <div class="settings-sec">Theme</div>
     <div class="field"><select data-t="theme">
@@ -787,17 +878,32 @@ function settingsSheet(){
     draw(sheet);
     sheet.addEventListener('click', (e) => {
       const t = e.target.closest('[data-t]'); if (!t) return;
-      const act = t.dataset.t;
+      const act = t.dataset.t, rid = t.dataset.rid;
       if (act === 'close'){ closeSheet(); render(); }
       if (act === 'day'){
         const d = +t.dataset.d;
         S.workdays = S.workdays.includes(d) ? S.workdays.filter(x=>x!==d) : S.workdays.concat(d).sort();
         save(); draw(sheet);
       }
-      if (act === 'del-routine'){ S.routine = S.routine.filter(r=>r.id!==t.dataset.id); save(); draw(sheet); }
-      if (act === 'add-routine'){
-        const inp = $('#set-routine-in', sheet); const txt = inp.value.trim(); if (!txt) return;
-        S.routine.push({ id: uid(), text: txt }); inp.value=''; save(); draw(sheet);
+      if (act === 'del-rtn'){
+        const r = S.routines.find(x=>x.id===rid);
+        if (confirm('Delete "' + r.name + '"?')){
+          S.routines = S.routines.filter(x=>x.id!==rid); save(); draw(sheet);
+        }
+      }
+      if (act === 'add-rtn'){
+        S.routines.push({ id: uid(), name: 'New routine', emoji: '', steps: [] });
+        save(); draw(sheet);
+      }
+      if (act === 'del-step'){
+        const r = S.routines.find(x=>x.id===rid);
+        r.steps = r.steps.filter(s=>s.id!==t.dataset.id); save(); draw(sheet);
+      }
+      if (act === 'add-step'){
+        const r = S.routines.find(x=>x.id===rid);
+        const inp = sheet.querySelector(`[data-t=step-in][data-rid="${rid}"]`);
+        const txt = inp.value.trim(); if (!txt) return;
+        r.steps.push({ id: uid(), text: txt }); inp.value=''; save(); draw(sheet);
       }
       if (act === 'export'){
         const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
@@ -815,11 +921,19 @@ function settingsSheet(){
     sheet.addEventListener('change', (e) => {
       const t = e.target.closest('[data-t]'); if (!t) return;
       if (t.dataset.t === 'name'){ S.name = t.value.trim() || 'friend'; save(); }
+      if (t.dataset.t === 'rname'){
+        const r = S.routines.find(x=>x.id===t.dataset.rid);
+        if (r){ r.name = t.value.trim() || 'Routine'; save(); }
+      }
       if (t.dataset.t === 'shift-start'){ S.shiftStart = fromHM(t.value); save(); }
       if (t.dataset.t === 'shift-end'){ S.shiftEnd = fromHM(t.value); save(); }
       if (t.dataset.t === 'theme'){ S.theme = t.value; save(); applyTheme(); }
     });
-    $('#set-routine-in', sheet).addEventListener('keydown', (e)=>{ if (e.key==='Enter') $('[data-t=add-routine]', sheet).click(); });
+    sheet.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.matches('[data-t=step-in]')){
+        sheet.querySelector(`[data-t=add-step][data-rid="${e.target.dataset.rid}"]`).click();
+      }
+    });
   });
 }
 
@@ -827,31 +941,37 @@ function settingsSheet(){
 document.addEventListener('click', (e) => {
   const t = e.target.closest('[data-act]'); if (!t) return;
   const act = t.dataset.act;
-  if (act === 'nav'){ view = t.dataset.v; render(); window.scrollTo(0,0); }
+  if (act === 'nav'){ view = t.dataset.v; if (view==='today' && !S.days[selKey]) ensureDay(selKey); render(); window.scrollTo(0,0); }
   if (act === 'settings') settingsSheet();
   if (act === 'set-day'){
-    const day = ensureDay();
+    const day = ensureDay(todayKey());
     const wantWork = t.dataset.v === 'work';
     const autoWork = S.workdays.includes(new Date().getDay());
     day.mode = (wantWork === autoWork) ? 'auto' : t.dataset.v;
-    // reseed only if the day still has its untouched seed? keep blocks; just flip mode.
     save(); render();
   }
   if (act === 'routine'){
     const k = todayKey();
-    const arr = S.routineDone[k] || (S.routineDone[k] = []);
+    const rd = S.routineDone[k] || (S.routineDone[k] = {});
+    const arr = rd[t.dataset.rid] || (rd[t.dataset.rid] = []);
     const id = t.dataset.id;
-    S.routineDone[k] = arr.includes(id) ? arr.filter(x=>x!==id) : arr.concat(id);
+    rd[t.dataset.rid] = arr.includes(id) ? arr.filter(x=>x!==id) : arr.concat(id);
     save(); render();
   }
   if (act === 'done-block'){
-    const b = ensureDay().blocks.find(x=>x.id===t.dataset.id);
+    const b = ensureDay(todayKey()).blocks.find(x=>x.id===t.dataset.id);
     if (b){ b.done = true; save(); render(); }
   }
-  if (act === 'goto-today'){ view='today'; render(); window.scrollTo(0,0); }
-  if (act === 'add-block') blockSheet(null);
-  if (act === 'edit-block') blockSheet(t.dataset.id);
+  if (act === 'goto-today'){ selKey = todayKey(); view='today'; render(); window.scrollTo(0,0); }
+  if (act === 'add-block') blockSheet(null, view==='today' ? selKey : todayKey());
+  if (act === 'edit-block') blockSheet(t.dataset.id, selKey);
   if (act === 'reflow') reflow();
+  if (act === 'pick-day'){ selKey = t.dataset.k; render(); }
+  if (act === 'week-move'){
+    const d = dateFromKey(selKey); d.setDate(d.getDate() + 7 * (+t.dataset.dir));
+    selKey = keyFromDate(d); render();
+  }
+  if (act === 'back-today'){ selKey = todayKey(); render(); }
   if (act === 'open-island') islandSheet(t.dataset.id);
   if (act === 'new-island') islandEditSheet(null);
   if (act === 'assign') assignSheet(t.dataset.id);
